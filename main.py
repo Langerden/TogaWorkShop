@@ -55,8 +55,14 @@ class PokeDex(toga.App):
                             on_select=self.select_element)
 
     def load_async_data(self):
+        self.data.clear()
+        self.table.data = self.data
+        
         thread = threading.Thread(target=self.load_data)
         thread.start()
+        thread.join()
+
+        self.table.data = self.data
 
     def load_async_pokemon(self, pokemon):
         thread = threading.Thread(target=self.load_pokemon, args=[pokemon])
@@ -83,8 +89,6 @@ class PokeDex(toga.App):
             print(sprite)
 
     def load_data(self):
-        self.data.clear()
-
         path = 'https://pokeapi.co/api/v2/pokemon-form?offset={}&limit=20'.format(self.offset)
 
         response = requests.get(path)
@@ -94,8 +98,6 @@ class PokeDex(toga.App):
             for pokemon in result['results']:
                 name = pokemon['name']
                 self.data.append(name)
-
-        self.table.data = self.data
 
     #CALLBACKS
     def next(self, widget):
@@ -114,7 +116,6 @@ class PokeDex(toga.App):
         self.load_async_data()
 
         widget.enabled = True
-        self.table.data = self.data
 
         self.validate_previous_command()
 
